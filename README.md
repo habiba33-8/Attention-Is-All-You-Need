@@ -10,12 +10,20 @@ Sequence modeling historically relied on recurrent or convolutional structure to
 
 This project exists to:
 
-- **Explain by construction**: implement scaled dot-product attention, multi-head attention, positional encoding, and encoder/decoder blocks in **incremental stages** (`01_` … `06_`), matching how the paper stacks ideas.
+- **Explain by construction**: implement scaled dot-product attention, multi-head attention, positional encoding, and encoder/decoder blocks in **incremental stages** (`01_` through `06_`), matching how the paper stacks ideas.
 - **Ground claims in code**: unit tests exercise shapes, masking, and normalization behavior expected from the paper’s formulation.
 - **Support experimentation**: scripts under `experiments/` sketch ablations (e.g., multi-head vs single-head, effects of positional encoding) aligned with discussions and tables in the original work.
 - **Provide a training scaffold**: `06_transformer_full/` wires embeddings, positional encoding, stacked layers, and a teacher-forced loss loop with YAML-driven hyperparameters (paper-scale defaults such as `d_model=512`, `N=6`, `h=8`, `d_ff=2048`).
 
 The intended reader is someone who wants both **intuition** (what each block does and why) and **executable reference** (how tensors flow and how masks enforce causality).
+
+---
+
+## Written report (website)
+
+Long-form analysis, figures, and narrative notes will live on a separate site (not in this repo). When your site is published, put the URL here:
+
+**[Open the written report](https://example.com)** — replace `https://example.com` with your real link (e.g. GitHub Pages, Notion, or a personal domain).
 
 ---
 
@@ -38,7 +46,6 @@ Together, these pieces illustrate the paper’s central thesis: **attention mech
 
 | Path | Role |
 |------|------|
-| `00_paper_analysis00_paper_analysis` | Space for paper summaries, derivations, and notes alongside the code (organize as you prefer). |
 | `01_attention` | Scaled dot-product attention and tests. |
 | `02_multi_head_attention` | Multi-head attention module and tests. |
 | `03_positional_encoding` | Positional encoding implementation and `visualization.ipynb` for exploration. |
