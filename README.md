@@ -4,6 +4,57 @@ An educational PyTorch implementation and analysis workspace centered on the Tra
 
 ---
 
+## Visuals
+
+The **full architecture** below is the canonical figure from the paper (Figure 1). The **self-attention** subsection uses a small [Mermaid](https://mermaid.js.org/) diagram for the scaled dot-product block.
+
+### Transformer architecture
+
+End-to-end **seq2seq** flow: the encoder (left) builds contextual representations of the source; the decoder (right) consumes **outputs shifted right** with positional encoding, uses **masked** multi-head self-attention, then **multi-head attention** over the encoder stack, then feed-forward layers—with **Add & Norm** and residuals after each sub-layer. The top **Linear** and **Softmax** produce **output probabilities**.
+
+![Figure 1: The Transformer — model architecture](assets/transformer-architecture.png)
+
+*Figure 1 from Vaswani et al., “Attention Is All You Need” ([arXiv:1706.03762](https://arxiv.org/abs/1706.03762)).*
+
+Each **encoder layer** is: multi-head self-attention over the source, then a position-wise feed-forward network, with residuals and normalization. Each **decoder layer** adds **masked** self-attention (no peeking at future tokens), then **encoder–decoder attention** (queries from the decoder, keys and values from the encoder output), then the FFN.
+
+---
+
+### Self-attention (scaled dot-product)
+
+For one attention head, the same input `X` is projected to **queries**, **keys**, and **values**. Alignment scores are dot products scaled by \(1/\sqrt{d_k}\); softmax yields a **weight matrix** over keys; the output is a **weighted sum of values**. Optional **masks** zero out illegal positions (padding or future tokens) before softmax.
+
+```mermaid
+flowchart TB
+  X["Input X (batch x seq x d_model)"]
+
+  X --> WQ["Linear W_Q"]
+  X --> WK["Linear W_K"]
+  X --> WV["Linear W_V"]
+
+  WQ --> Q[Queries Q]
+  WK --> K[Keys K]
+  WV --> V[Values V]
+
+  Q --> SCORES["Scores = Q multiply K-transpose / sqrt(d_k)"]
+  K --> SCORES
+
+  SCORES --> MASK{"Optional mask (padding or causal)"}
+  MASK --> SOFT["Softmax over keys"]
+  SOFT --> A[Attention weights A]
+
+  A --> OUT["Weighted mix A V"]
+  V --> OUT
+
+  OUT --> O["Output sequence same shape as X"]
+```
+
+**Matrix view:** `A` has shape `(query positions × key positions)`. Row \(i\) is how much query position \(i\) attends to every key \(j\). This repo implements the same pipeline in `01_attention/attention.py` and stacks multiple heads in `02_multi_head_attention/`.
+
+For **plots** (heatmaps, positional curves), open `03_positional_encoding/visualization.ipynb`.
+
+---
+
 ## Purpose and motivation
 
 Sequence modeling historically relied on recurrent or convolutional structure to propagate information across time steps. The Transformer replaces recurrence with **pure attention**: every position can attend to every other position in **one or two depth-wise passes**, enabling highly parallel training and long-range dependencies mediated directly by learned pairwise weights.
