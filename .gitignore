@@ -149,6 +149,7 @@ activemq-data/
 
 # Environments
 .env
+.env.*
 .envrc
 .venv
 env/
@@ -182,23 +183,15 @@ dmypy.json
 cython_debug/
 
 # PyCharm
-#   JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#   be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#   and can be added to the global gitignore or merged into this file.  For a more nuclear
-#   option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#   JetBrains-specific template: https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 # .idea/
 
 # Abstra
-#   Abstra is an AI-powered process automation framework.
-#   Ignore directories containing user credentials, local state, and settings.
-#   Learn more at https://abstra.io/docs
+#   https://abstra.io/docs
 .abstra/
 
 # Visual Studio Code
-#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
-#   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#   and can be added to the global gitignore or merged into this file. However, if you prefer, 
-#   you could uncomment the following to ignore the entire vscode folder
+#   https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 # .vscode/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
@@ -216,3 +209,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- This project (Transformer / PyTorch) ---
+*.pth
+*.pt
+wandb/
+
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp

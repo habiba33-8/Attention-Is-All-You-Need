@@ -1,0 +1,11 @@
+# Configuration for Transformer training
+src_vocab_size: 37000  # As in paper for EN-DE
+tgt_vocab_size: 37000
+d_model: 512
+num_layers: 6
+num_heads: 8
+d_ff: 2048
+max_len: 5000
+dropout: 0.1
+batch_size: 64  # Example
+epochs: 10      # Small for demo
