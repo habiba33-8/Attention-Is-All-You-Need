@@ -106,11 +106,10 @@ The intended reader is someone who wants both **intuition** (what each block doe
 
 ---
 
-## Written report (website)
-
+## Written report
 Long-form analysis, figures, and narrative notes will live on a separate site (not in this repo). When your site is published, put the URL here:
 
-**[Open the written report](https://example.com)** — replace `https://example.com` with your real link (e.g. GitHub Pages, Notion, or a personal domain).
+**[Open the written report]()**
 
 ---
 
