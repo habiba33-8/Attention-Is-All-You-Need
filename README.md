@@ -3,15 +3,7 @@
 An educational PyTorch implementation and analysis workspace centered on the Transformer architecture introduced by Vaswani et al. in [*Attention Is All You Need*](https://arxiv.org/abs/1706.03762). The repository is organized so each major mechanism from the paper lives in its own module, building from primitives (attention) to full encoder–decoder stacks and a configurable training entry point.
 
 ---
-
-## Visuals
-
-Diagrams use [Mermaid](https://mermaid.js.org/) so they render on GitHub as **code blocks** (no bundled image files). They follow the layout of Figure 1 in Vaswani et al. ([arXiv:1706.03762](https://arxiv.org/abs/1706.03762)).
-
 ### Transformer architecture
-
-End-to-end **seq2seq** flow: **Inputs** → encoder stack **N×** → memory fed into the decoder; **Outputs (shifted right)** → decoder stack **N×** → **Linear** → **Softmax** → probabilities. Residual arrows are implicit in each **Add & Norm** after a sub-layer.
-
 ```mermaid
 flowchart TB
   subgraph EncIn["Encoder input"]
