@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 def pointwise_feed_forward(d_model, d_ff):

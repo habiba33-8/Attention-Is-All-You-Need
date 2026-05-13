@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,6 +15,8 @@ def load_config(config_path='config.yaml'):
     Returns:
         dict: Configuration parameters.
     """
+    if not os.path.isabs(config_path):
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)  # Safely load YAML
     return config
@@ -37,32 +40,48 @@ def train_model(config):
         dropout=config['dropout']
     )
     
-    # Step 2: Loss and optimizer (as in paper, Adam with custom schedule)
+    # Step 2: Loss and optimizer (Adam; use learning_rate > 0 so the model can actually fit data)
     criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore padding
-    optimizer = optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9)
+    lr = float(config.get('learning_rate', 3e-4))
+    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.98), eps=1e-9)
     
     # Step 3: Dummy data for example (replace with real dataset)
-    # Assume src and tgt are tensors of shape (batch, seq_len)
-    src = torch.randint(1, config['src_vocab_size'], (config['batch_size'], config['max_len']))
-    tgt = torch.randint(1, config['tgt_vocab_size'], (config['batch_size'], config['max_len']))
+    # max_len in config is the positional-encoding cap; long sequences here blow up memory (O(seq^2) attention).
+    demo_seq = min(int(config.get('demo_seq_len', 128)), int(config['max_len']))
+    src = torch.randint(1, config['src_vocab_size'], (config['batch_size'], demo_seq))
+    tgt = torch.randint(1, config['tgt_vocab_size'], (config['batch_size'], demo_seq))
     
-    # Step 4: Training loop
+    # Step 4: Training loop (one fixed batch repeated when overfit_single_batch is true)
+    num_epochs = int(config['overfit_epochs']) if config.get('overfit_single_batch') else int(config['epochs'])
+    overfit = bool(config.get('overfit_single_batch'))
+    if overfit:
+        print(f'Overfitting test: single batch, {num_epochs} epochs, lr={lr}')
+
     model.train()
-    for epoch in range(config['epochs']):
+    for epoch in range(num_epochs):
         optimizer.zero_grad()
-        
+
         # Step 5: Forward pass (shift tgt for teacher forcing)
         output = model(src, tgt[:, :-1])  # Input up to last token
+        if epoch == 0:
+            print(output.shape)
+            pred = output.argmax(dim=-1)
+            print(pred)
         loss = criterion(output.contiguous().view(-1, config['tgt_vocab_size']), tgt[:, 1:].contiguous().view(-1))
-        
+
         # Step 6: Backward and optimize
         loss.backward()
         optimizer.step()
-        
-        print(f'Epoch {epoch+1}, Loss: {loss.item()}')
+
+        if overfit:
+            if epoch == 0 or epoch == num_epochs - 1 or (epoch + 1) % max(1, num_epochs // 20) == 0:
+                print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item():.4f}')
+        else:
+            print(f'Epoch {epoch+1}, Loss: {loss.item()}')
     
     # Step 7: Save model (optional)
-    torch.save(model.state_dict(), 'transformer.pth')
+    _out = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'transformer.pth')
+    torch.save(model.state_dict(), _out)
 
 if __name__ == '__main__':
     config = load_config()

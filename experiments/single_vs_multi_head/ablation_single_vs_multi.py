@@ -12,11 +12,25 @@ This directly corresponds to Table 3 row (A) in the paper:
 We keep total computation roughly similar by adjusting d_k / d_v accordingly.
 """
 
+import math
+import os
+import sys
+
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+for _subdir in (
+    "02_multi_head_attention",
+    "03_positional_encoding",
+    "04_encoder_block",
+    "05_decoder_block",
+):
+    _p = os.path.join(_REPO_ROOT, _subdir)
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-import math
 from copy import deepcopy
 
 # ────────────────────────────────────────────────

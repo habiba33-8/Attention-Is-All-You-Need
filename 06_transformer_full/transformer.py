@@ -1,4 +1,23 @@
+import math
+import os
+import sys
 import torch.nn as nn
+
+_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for _subdir in (
+    "02_multi_head_attention",
+    "03_positional_encoding",
+    "04_encoder_block",
+    "05_decoder_block",
+):
+    _p = os.path.join(_REPO, _subdir)
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+from positional_encoding import PositionalEncoding
+from encoder_block import EncoderLayer
+from decoder_block import DecoderLayer
+
 
 class Transformer(nn.Module):
     """

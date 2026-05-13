@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import unittest
 from encoder_block import EncoderLayer
 
@@ -29,13 +30,18 @@ class TestEncoderLayer(unittest.TestCase):
         self.assertEqual(output.shape, self.input.shape)
         
     def test_residual_connections(self):
-        # Step 6: Disable sub-layers to check residuals (for testing)
+        # Step 6: Zero attention and FFN contributions; with post-norm, output is norm2(norm1(x)), not x.
         with torch.no_grad():
-            self.encoder_layer.self_attn.output_linear.weight.fill_(0)  # Zero attention
-            self.encoder_layer.feed_forward[0].weight.fill_(0)         # Zero FF
+            self.encoder_layer.eval()
+            self.encoder_layer.self_attn.output_linear.weight.zero_()
+            self.encoder_layer.self_attn.output_linear.bias.zero_()
+            for m in self.encoder_layer.feed_forward:
+                if isinstance(m, nn.Linear):
+                    m.weight.zero_()
+                    m.bias.zero_()
             output = self.encoder_layer(self.input)
-            # Output should be close to input due to residuals
-            self.assertTrue(torch.allclose(output, self.input, atol=1e-5))
+            expected = self.encoder_layer.norm2(self.encoder_layer.norm1(self.input))
+            self.assertTrue(torch.allclose(output, expected, atol=1e-5))
 
 if __name__ == '__main__':
     unittest.main()

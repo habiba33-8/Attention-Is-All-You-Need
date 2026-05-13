@@ -1,4 +1,13 @@
+import os
+import sys
 import torch.nn as nn
+
+_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_MHA = os.path.join(_REPO, "02_multi_head_attention")
+if _MHA not in sys.path:
+    sys.path.insert(0, _MHA)
+from multi_head import MultiHeadAttention
+
 
 class DecoderLayer(nn.Module):
     """

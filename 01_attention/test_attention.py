@@ -20,7 +20,8 @@ class TestScaledDotProductAttention(unittest.TestCase):
         self.value = torch.randn(self.batch_size, 1, self.seq_len, self.d_v)
         
         # Step 3: Create a sample mask (e.g., for padding or look-ahead)
-        self.mask = torch.tensor([[[[1, 1, 0], [1, 0, 0], [0, 0, 0]]]])  # Shape: (1,1,seq_len,seq_len), batch=1 for example
+        # Each query row must allow at least one key so softmax is defined; last key column stays masked.
+        self.mask = torch.tensor([[[[1, 1, 0], [1, 0, 0], [1, 0, 0]]]])  # Shape: (1,1,seq_len,seq_len), batch=1 for example
         
     def test_attention_output_shape(self):
         # Step 4: Call the function without mask
