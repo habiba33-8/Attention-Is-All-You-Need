@@ -6,17 +6,61 @@ An educational PyTorch implementation and analysis workspace centered on the Tra
 
 ## Visuals
 
-The **full architecture** below is the canonical figure from the paper (Figure 1). The **self-attention** subsection uses a small [Mermaid](https://mermaid.js.org/) diagram for the scaled dot-product block.
+Diagrams use [Mermaid](https://mermaid.js.org/) so they render on GitHub as **code blocks** (no bundled image files). They follow the layout of Figure 1 in Vaswani et al. ([arXiv:1706.03762](https://arxiv.org/abs/1706.03762)).
 
 ### Transformer architecture
 
-End-to-end **seq2seq** flow: the encoder (left) builds contextual representations of the source; the decoder (right) consumes **outputs shifted right** with positional encoding, uses **masked** multi-head self-attention, then **multi-head attention** over the encoder stack, then feed-forward layers—with **Add & Norm** and residuals after each sub-layer. The top **Linear** and **Softmax** produce **output probabilities**.
+End-to-end **seq2seq** flow: **Inputs** → encoder stack **N×** → memory fed into the decoder; **Outputs (shifted right)** → decoder stack **N×** → **Linear** → **Softmax** → probabilities. Residual arrows are implicit in each **Add & Norm** after a sub-layer.
 
-![Figure 1: The Transformer — model architecture](assets/transformer-architecture.png)
+```mermaid
+flowchart TB
+  subgraph EncIn["Encoder input"]
+    IN[Inputs]
+    INE[Input Embedding]
+    PE1[Positional Encoding]
+    IN --> INE
+    PE1 --> ADD1((+))
+    INE --> ADD1
+  end
 
-*Figure 1 from Vaswani et al., “Attention Is All You Need” ([arXiv:1706.03762](https://arxiv.org/abs/1706.03762)).*
+  subgraph EncLayer["Encoder layer × N"]
+    MHSA[Multi-Head Attention]
+    AN1[Add and Norm]
+    FF1[Feed Forward]
+    AN2[Add and Norm]
+    ADD1 --> MHSA --> AN1 --> FF1 --> AN2
+  end
 
-Each **encoder layer** is: multi-head self-attention over the source, then a position-wise feed-forward network, with residuals and normalization. Each **decoder layer** adds **masked** self-attention (no peeking at future tokens), then **encoder–decoder attention** (queries from the decoder, keys and values from the encoder output), then the FFN.
+  subgraph DecIn["Decoder input"]
+    OUTLAB[Outputs shifted right]
+    OE[Output Embedding]
+    PE2[Positional Encoding]
+    OUTLAB --> OE
+    PE2 --> ADD2((+))
+    OE --> ADD2
+  end
+
+  subgraph DecLayer["Decoder layer × N"]
+    MMH[Masked Multi-Head Attention]
+    AN3[Add and Norm]
+    MHC[Multi-Head Attention]
+    AN4[Add and Norm]
+    FF2[Feed Forward]
+    AN5[Add and Norm]
+    ADD2 --> MMH --> AN3 --> MHC --> AN4 --> FF2 --> AN5
+  end
+
+  subgraph OutHead["Output"]
+    LIN[Linear]
+    SM[Softmax]
+    PROB[Output Probabilities]
+    AN5 --> LIN --> SM --> PROB
+  end
+
+  AN2 --> MHC
+```
+
+Each **encoder layer** is multi-head **self**-attention over the source, then FFN, each wrapped with residual + norm. Each **decoder layer** is **masked** self-attention, then **encoder–decoder** attention (keys/values from the encoder top), then FFN, again with residual + norm after each block.
 
 ---
 
