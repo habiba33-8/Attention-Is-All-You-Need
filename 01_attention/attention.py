@@ -17,21 +17,20 @@ def scaled_dot_product_attention(query, key, value, mask=None):
         torch.Tensor: Attention weights (optional, for visualization)
     """
     # Step 1: Compute dot products of query with all keys
-    # We transpose the key to align dimensions for matrix multiplication: (seq_len, d_k) -> (d_k, seq_len)
-    dot_products = torch.matmul(query, key.transpose(-2, -1))  # Shape: (batch_size, num_heads, seq_len_q, seq_len_k)
+    dot_products = torch.matmul(query, key.transpose(-2, -1)) 
     
     # Step 2: Scale the dot products by 1/sqrt(d_k) to prevent large values pushing softmax to extremes
-    d_k = query.size(-1)  # Dimension of keys/queries
+    d_k = query.size(-1)  
     scaled_dot_products = dot_products / math.sqrt(d_k)
     
     # Step 3: Apply mask if provided (for decoder to prevent future peeking or padding)
     if mask is not None:
-        scaled_dot_products = scaled_dot_products.masked_fill(mask == 0, float('-inf'))  # Set invalid positions to -inf
+        scaled_dot_products = scaled_dot_products.masked_fill(mask == 0, float('-inf'))  
     
     # Step 4: Apply softmax to get attention weights
-    attention_weights = F.softmax(scaled_dot_products, dim=-1)  # Softmax over the last dimension (seq_len_k)
+    attention_weights = F.softmax(scaled_dot_products, dim=-1)  
     
     # Step 5: Compute weighted sum of values
-    output = torch.matmul(attention_weights, value)  # Shape: (batch_size, num_heads, seq_len_q, d_v)
+    output = torch.matmul(attention_weights, value) 
     
     return output, attention_weights
