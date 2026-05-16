@@ -18,10 +18,8 @@ def run_ablation():
     class NoPETransformer(Transformer):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.pos_encoding = nn.Identity()  # Replace PE with identity
-    
+            self.pos_encoding = nn.Identity()  
     # Step 2: Compare with normal model (train and evaluate)
-    # (Dummy print for example)
     print("Ablation: Training without PE...")
     # Add training code similar to train.py
 
