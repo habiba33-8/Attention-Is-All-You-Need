@@ -18,7 +18,7 @@ def load_config(config_path='config.yaml'):
     if not os.path.isabs(config_path):
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
     with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)  # Safely load YAML
+        config = yaml.safe_load(f) 
     return config
 
 def train_model(config):
@@ -41,12 +41,11 @@ def train_model(config):
     )
     
     # Step 2: Loss and optimizer (Adam; use learning_rate > 0 so the model can actually fit data)
-    criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore padding
+    criterion = nn.CrossEntropyLoss(ignore_index=0) 
     lr = float(config.get('learning_rate', 3e-4))
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.98), eps=1e-9)
     
     # Step 3: Dummy data for example (replace with real dataset)
-    # max_len in config is the positional-encoding cap; long sequences here blow up memory (O(seq^2) attention).
     demo_seq = min(int(config.get('demo_seq_len', 128)), int(config['max_len']))
     src = torch.randint(1, config['src_vocab_size'], (config['batch_size'], demo_seq))
     tgt = torch.randint(1, config['tgt_vocab_size'], (config['batch_size'], demo_seq))
@@ -62,7 +61,7 @@ def train_model(config):
         optimizer.zero_grad()
 
         # Step 5: Forward pass (shift tgt for teacher forcing)
-        output = model(src, tgt[:, :-1])  # Input up to last token
+        output = model(src, tgt[:, :-1]) 
         if epoch == 0:
             print(output.shape)
             pred = output.argmax(dim=-1)
