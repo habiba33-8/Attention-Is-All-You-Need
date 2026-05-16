@@ -45,7 +45,7 @@ class DecoderLayer(nn.Module):
         
     def forward(self, x, enc_output, src_mask=None, tgt_mask=None):
         # Step 1: Masked Self-Attention with residual and norm
-        self_attn_output = self.self_attn(x, x, x, tgt_mask)  # Masked to prevent future info
+        self_attn_output = self.self_attn(x, x, x, tgt_mask) 
         x = self.norm1(x + self.dropout(self_attn_output))
         
         # Step 2: Encoder-Decoder Attention (queries from decoder, keys/values from encoder)
