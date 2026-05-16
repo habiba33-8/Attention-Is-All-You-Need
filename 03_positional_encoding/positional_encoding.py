@@ -15,9 +15,9 @@ class PositionalEncoding(nn.Module):
         super(PositionalEncoding, self).__init__()
         
         # Step 1: Precompute the positional encoding matrix
-        pe = torch.zeros(max_len, d_model)  # Shape: (max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)  # Positions: (max_len, 1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))  # Divisor terms
+        pe = torch.zeros(max_len, d_model)  
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)  
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)) 
         
         # Step 2: Apply sine to even indices
         pe[:, 0::2] = torch.sin(position * div_term)
@@ -26,10 +26,10 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         
         # Step 4: Add batch dimension and register as buffer (not trainable)
-        pe = pe.unsqueeze(0)  # Shape: (1, max_len, d_model)
+        pe = pe.unsqueeze(0)  
         self.register_buffer('pe', pe)
         
     def forward(self, x):
         # Step 5: Add positional encoding to input (broadcasting over batch)
-        x = x + self.pe[:, :x.size(1)]  # x shape: (batch_size, seq_len, d_model)
+        x = x + self.pe[:, :x.size(1)]  
         return x
