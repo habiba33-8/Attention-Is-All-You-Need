@@ -12,7 +12,7 @@ def create_padding_mask(seq, pad_token=0):
         torch.Tensor: Mask (batch_size, 1, 1, seq_len) where 0 means padded
     """
     # Create boolean mask: True where seq == pad_token
-    mask = (seq != pad_token).unsqueeze(1).unsqueeze(2).float()  # Expand dims for broadcasting
+    mask = (seq != pad_token).unsqueeze(1).unsqueeze(2).float()  
     return mask
 
 def create_look_ahead_mask(size):
@@ -25,6 +25,5 @@ def create_look_ahead_mask(size):
     Returns:
         torch.Tensor: Upper triangular mask (1, size, size)
     """
-    # Create upper triangular matrix with 1s above diagonal (future positions)
     mask = 1 - torch.triu(torch.ones(1, size, size), diagonal=1)
-    return mask  # 0 for future positions
+    return mask  
