@@ -6,14 +6,3 @@ num_layers: 6
 num_heads: 8
 d_ff: 2048
 max_len: 5000
-# Synthetic batches in train.py use this cap (not full max_len) so attention stays tractable on a laptop.
-demo_seq_len: 128
-dropout: 0.1
-batch_size: 64  # Example
-epochs: 10      # Small for demo
-learning_rate: 3.0e-4
-
-# Overfitting sanity check: same src/tgt every step; many epochs so loss should fall if lr > 0.
-# Set false to use `epochs` instead of `overfit_epochs` (shorter standard demo).
-overfit_single_batch: true
-overfit_epochs: 80
