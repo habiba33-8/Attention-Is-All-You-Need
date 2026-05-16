@@ -1,46 +1,208 @@
+"""
+Ablation Study: Positional Encoding vs No Positional Encoding
+--------------------------------------------------------------
+Compares Transformer performance with:
+  - Full model (with Positional Encoding)
+  - No-PE model (Positional Encoding removed)
+
+Metric:
+  - Cross-entropy loss (train + validation)
+
+Note:
+This isolates the effect of positional encoding.
+"""
+
+import math
 import os
 import sys
+import torch
 import torch.nn as nn
-
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_TRANSFORMER_DIR = os.path.join(_REPO_ROOT, "06_transformer_full")
 
-if _TRANSFORMER_DIR not in sys.path:
-    sys.path.insert(0, _TRANSFORMER_DIR)
+for _subdir in (
+    "02_multi_head_attention",
+    "03_positional_encoding",
+    "04_encoder_block",
+    "05_decoder_block",
+):
+    _p = os.path.join(_REPO_ROOT, _subdir)
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
-from transformer import Transformer
-
-
-from train import train_model, load_config
-
-
-class NoPETransformer(Transformer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # disable positional encoding
-        self.pos_encoding = nn.Identity()
+from positional_encoding import PositionalEncoding
+from encoder_block import EncoderLayer
+from decoder_block import DecoderLayer
 
 
-def run_ablation(config):
-    print("\n===== Ablation Study: WITHOUT Positional Encoding =====")
+class SimpleTransformer(nn.Module):
+    def __init__(self, vocab_size, d_model=128, num_layers=2, num_heads=8, d_ff=512, dropout=0.1, use_pe=True):
+        super().__init__()
 
-    model = NoPETransformer(
-        src_vocab_size=config['src_vocab_size'],
-        tgt_vocab_size=config['tgt_vocab_size'],
-        d_model=config['d_model'],
-        num_layers=config['num_layers'],
-        num_heads=config['num_heads'],
-        d_ff=config['d_ff'],
-        max_len=config['max_len'],
-        dropout=config['dropout']
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.pos_encoding = PositionalEncoding(d_model) if use_pe else nn.Identity()
+        self.dropout = nn.Dropout(dropout)
+
+        self.encoder_layers = nn.ModuleList([
+            EncoderLayer(d_model, num_heads, d_ff, dropout)
+            for _ in range(num_layers)
+        ])
+
+        self.decoder_layers = nn.ModuleList([
+            DecoderLayer(d_model, num_heads, d_ff, dropout)
+            for _ in range(num_layers)
+        ])
+
+        self.output = nn.Linear(d_model, vocab_size)
+        self.scale = math.sqrt(d_model)
+
+    def forward(self, src, tgt):
+        src = self.embedding(src) * self.scale
+        src = self.pos_encoding(src)
+        src = self.dropout(src)
+
+        for layer in self.encoder_layers:
+            src = layer(src)
+
+        tgt = self.embedding(tgt) * self.scale
+        tgt = self.pos_encoding(tgt)
+        tgt = self.dropout(tgt)
+
+        for layer in self.decoder_layers:
+            tgt = layer(tgt, src)
+
+        return self.output(tgt)
+
+
+def count_params(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+def evaluate(model, loader, device):
+    model.eval()
+    criterion = nn.CrossEntropyLoss(ignore_index=0)
+    total_loss = 0
+
+    with torch.no_grad():
+        for src, tgt in loader:
+            src, tgt = src.to(device), tgt.to(device)
+
+            out = model(src, tgt[:, :-1])
+
+            loss = criterion(
+                out.reshape(-1, out.size(-1)),
+                tgt[:, 1:].reshape(-1)
+            )
+
+            total_loss += loss.item()
+
+    return total_loss / len(loader)
+
+
+def train(model, loader, device, epochs=5, lr=1e-3, name="model"):
+    model.to(device)
+    optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.98))
+    criterion = nn.CrossEntropyLoss(ignore_index=0)
+
+    model.train()
+
+    for epoch in range(epochs):
+        epoch_loss = 0
+
+        for src, tgt in loader:
+            src, tgt = src.to(device), tgt.to(device)
+
+            out = model(src, tgt[:, :-1])
+
+            loss = criterion(
+                out.reshape(-1, out.size(-1)),
+                tgt[:, 1:].reshape(-1)
+            )
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            epoch_loss += loss.item()
+
+        print(f"[{name}] Epoch {epoch+1}/{epochs} | Loss: {epoch_loss/len(loader):.4f}")
+
+    train_loss = epoch_loss / len(loader)
+    val_loss = evaluate(model, loader, device)
+
+    return train_loss, val_loss
+
+
+def run_ablation():
+    print("=" * 70)
+    print("Ablation: Positional Encoding vs No Positional Encoding")
+    print("=" * 70)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    vocab_size = 1000
+    seq_len = 20
+    batch_size = 32
+    samples = 2000
+
+    src = torch.randint(1, vocab_size, (samples, seq_len))
+    tgt = torch.randint(1, vocab_size, (samples, seq_len))
+
+    dataset = TensorDataset(src, tgt)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    # ---------------- WITH PE ----------------
+    print("\n[WITH Positional Encoding]")
+    model_pe = SimpleTransformer(
+        vocab_size=vocab_size,
+        num_heads=8,
+        use_pe=True
     )
 
-    trained_model = train_model(config)
+    print(f"Params: {count_params(model_pe):,}")
 
-    print("\nAblation finished.")
+    train_pe, val_pe = train(
+        model_pe,
+        loader,
+        device,
+        epochs=5,
+        name="with-PE"
+    )
+
+    # ---------------- WITHOUT PE ----------------
+    print("\n[WITHOUT Positional Encoding]")
+    model_no_pe = SimpleTransformer(
+        vocab_size=vocab_size,
+        num_heads=8,
+        use_pe=False
+    )
+
+    print(f"Params: {count_params(model_no_pe):,}")
+
+    train_no, val_no = train(
+        model_no_pe,
+        loader,
+        device,
+        epochs=5,
+        name="no-PE"
+    )
+
+    # ---------------- RESULTS ----------------
+    print("\n" + "=" * 70)
+    print("RESULTS")
+    print("-" * 70)
+
+    print(f"With PE    → train: {train_pe:.4f} | val: {val_pe:.4f}")
+    print(f"No PE      → train: {train_no:.4f} | val: {val_no:.4f}")
+
+    print("\nΔ validation loss:", round(val_no - val_pe, 4))
+
+    if val_no > val_pe:
+        print("→ Positional Encoding improves performance (expected)")
+    else:
+        print("→ Unexpected result (check setup)")
 
 if __name__ == "__main__":
-    config = load_config()
-    run_ablation(config)
+    run_ablation()
