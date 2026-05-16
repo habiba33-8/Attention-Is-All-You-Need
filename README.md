@@ -106,10 +106,8 @@ The intended reader is someone who wants both **intuition** (what each block doe
 
 ---
 
-## Written report
-Long-form analysis, figures, and narrative notes will live on a separate site (not in this repo). When your site is published, put the URL here:
-
-**[Open the written report]()**
+## report & Documentation 
+**[Open from here](https://project-documentation-iota.vercel.app/)**
 
 ---
 
