@@ -27,9 +27,9 @@ class EncoderLayer(nn.Module):
         
         # Sub-layer 2: Position-wise Feed-Forward
         self.feed_forward = nn.Sequential(
-            nn.Linear(d_model, d_ff),  # First linear
-            nn.ReLU(),                # Activation
-            nn.Linear(d_ff, d_model)  # Second linear
+            nn.Linear(d_model, d_ff),
+            nn.ReLU(),                
+            nn.Linear(d_ff, d_model) 
         )
         
         # Layer normalization for each sub-layer
@@ -40,9 +40,8 @@ class EncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x, mask=None):
-        # Step 1: Self-Attention sub-layer with residual connection and norm
-        attn_output = self.self_attn(x, x, x, mask)  # Query, key, value are all x (self-attn)
-        x = self.norm1(x + self.dropout(attn_output))  # Residual + norm
+        attn_output = self.self_attn(x, x, x, mask)  
+        x = self.norm1(x + self.dropout(attn_output))  
         
         # Step 2: Feed-Forward sub-layer with residual and norm
         ff_output = self.feed_forward(x)
