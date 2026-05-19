@@ -83,9 +83,6 @@ class Multi30kDataset(Dataset):
 
         self.tgt_vocab = Vocabulary()
 
-        # -----------------------------------------
-        # Build vocabularies
-        # -----------------------------------------
 
         src_tokens = []
         tgt_tokens = []
