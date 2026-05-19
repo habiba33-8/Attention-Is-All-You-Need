@@ -25,9 +25,6 @@ DEVICE = torch.device(
 
 
 def load_config(config_path='config.yaml'):
-    """
-    Loads configuration from YAML file.
-    """
 
     if not os.path.isabs(config_path):
 
