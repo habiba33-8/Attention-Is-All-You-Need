@@ -1,10 +1,11 @@
 # Attention Is All You Need — Deep Analysis
 
 An educational PyTorch implementation and analysis workspace centered on the Transformer architecture introduced by Vaswani et al. in [*Attention Is All You Need*](https://arxiv.org/abs/1706.03762). The repository is organized so each major mechanism from the paper lives in its own module, building from primitives (attention) to full encoder–decoder stacks and a configurable training entry point.
+
 ---
 # Dataset
 
-For training and experimentation, this project uses the **[Multi30k Dataset (Hugging Face)]([https://project-documentation-iota.vercel.app/](https://huggingface.co/datasets/bentrevett/multi30k))**, a widely used benchmark for English–German machine translation tasks. It provides parallel sentence pairs suitable for sequence-to-sequence and Transformer evaluation.
+For training and experimentation, this project uses the **[Multi30k Dataset (Hugging Face)](https://huggingface.co/datasets/bentrevett/multi30k)**, a widely used benchmark for English–German machine translation tasks. It provides parallel sentence pairs suitable for sequence-to-sequence and Transformer evaluation.
 
 ---
 ### Transformer architecture
