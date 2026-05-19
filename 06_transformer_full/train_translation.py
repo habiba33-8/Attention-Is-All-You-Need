@@ -45,9 +45,6 @@ def load_config(config_path='config.yaml'):
 
 def train_model(config):
 
-    # ---------------------------------------------------
-    # Step 1: Load Dataset
-    # ---------------------------------------------------
 
     dataset_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -65,9 +62,6 @@ def train_model(config):
 
     print(f"Dataset Size: {len(dataset)}")
 
-    # ---------------------------------------------------
-    # Step 2: Vocabulary Sizes
-    # ---------------------------------------------------
 
     src_vocab_size = len(dataset.src_vocab)
     tgt_vocab_size = len(dataset.tgt_vocab)
@@ -75,9 +69,6 @@ def train_model(config):
     print(f"Source Vocabulary Size: {src_vocab_size}")
     print(f"Target Vocabulary Size: {tgt_vocab_size}")
 
-    # ---------------------------------------------------
-    # Step 3: Initialize Transformer
-    # ---------------------------------------------------
 
     model = Transformer(
         src_vocab_size=src_vocab_size,
@@ -90,17 +81,11 @@ def train_model(config):
         dropout=config['dropout']
     ).to(DEVICE)
 
-    # ---------------------------------------------------
-    # Step 4: Loss Function
-    # ---------------------------------------------------
 
     criterion = nn.CrossEntropyLoss(
         ignore_index=0
     )
 
-    # ---------------------------------------------------
-    # Step 5: Optimizer
-    # ---------------------------------------------------
 
     optimizer = optim.Adam(
         model.parameters(),
@@ -109,9 +94,6 @@ def train_model(config):
         eps=1e-9
     )
 
-    # ---------------------------------------------------
-    # Step 6: Training Loop
-    # ---------------------------------------------------
 
     num_epochs = int(config['epochs'])
 
@@ -128,17 +110,10 @@ def train_model(config):
             src = src.to(DEVICE)
             tgt = tgt.to(DEVICE)
 
-            # -----------------------------------------
-            # Teacher Forcing
-            # -----------------------------------------
 
             tgt_input = tgt[:, :-1]
 
             tgt_output = tgt[:, 1:]
-
-            # -----------------------------------------
-            # Masks
-            # -----------------------------------------
 
             src_mask = create_padding_mask(src).to(DEVICE)
 
@@ -152,9 +127,6 @@ def train_model(config):
 
             tgt_mask = tgt_padding_mask & look_ahead_mask
 
-            # -----------------------------------------
-            # Forward Pass
-            # -----------------------------------------
 
             output = model(
                 src,
@@ -163,10 +135,6 @@ def train_model(config):
                 tgt_mask
             )
 
-            # -----------------------------------------
-            # Reshape for CrossEntropyLoss
-            # -----------------------------------------
-
             output = output.contiguous().view(
                 -1,
                 tgt_vocab_size
@@ -174,18 +142,11 @@ def train_model(config):
 
             tgt_output = tgt_output.contiguous().view(-1)
 
-            # -----------------------------------------
-            # Compute Loss
-            # -----------------------------------------
-
             loss = criterion(
                 output,
                 tgt_output
             )
 
-            # -----------------------------------------
-            # Backpropagation
-            # -----------------------------------------
 
             optimizer.zero_grad()
 
@@ -201,10 +162,6 @@ def train_model(config):
 
             total_loss += loss.item()
 
-            # -----------------------------------------
-            # Logging
-            # -----------------------------------------
-
             if batch_idx % 50 == 0:
 
                 print(
@@ -213,9 +170,6 @@ def train_model(config):
                     f"Loss: {loss.item():.4f}"
                 )
 
-        # ---------------------------------------------------
-        # Epoch Summary
-        # ---------------------------------------------------
 
         avg_loss = total_loss / len(dataloader)
 
@@ -224,9 +178,6 @@ def train_model(config):
             f"| Average Loss: {avg_loss:.4f}\n"
         )
 
-    # ---------------------------------------------------
-    # Step 7: Save Model
-    # ---------------------------------------------------
 
     checkpoint_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
