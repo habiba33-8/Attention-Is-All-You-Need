@@ -6,15 +6,7 @@ from transformer import Transformer
 import yaml
 
 def load_config(config_path='config.yaml'):
-    """
-    Loads configuration from YAML file.
-    
-    Args:
-        config_path (str): Path to config file.
-    
-    Returns:
-        dict: Configuration parameters.
-    """
+   
     if not os.path.isabs(config_path):
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_path)
     with open(config_path, 'r') as f:
@@ -22,12 +14,7 @@ def load_config(config_path='config.yaml'):
     return config
 
 def train_model(config):
-    """
-    Training loop for the Transformer model.
-    
-    Args:
-        config (dict): Configuration dictionary.
-    """
+  
     # Step 1: Initialize model
     model = Transformer(
         src_vocab_size=config['src_vocab_size'],
