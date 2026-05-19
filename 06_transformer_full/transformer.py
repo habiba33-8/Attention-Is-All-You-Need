@@ -20,19 +20,7 @@ from decoder_block import DecoderLayer
 
 
 class Transformer(nn.Module):
-    """
-    Full Transformer model with encoder and decoder stacks.
-    
-    Args:
-        src_vocab_size (int): Source vocabulary size
-        tgt_vocab_size (int): Target vocabulary size
-        d_model (int): Model dimension (512)
-        num_layers (int): Number of layers (N=6)
-        num_heads (int): Attention heads (8)
-        d_ff (int): Feed-forward dim (2048)
-        max_len (int): Max sequence length
-        dropout (float): Dropout rate (0.1)
-    """
+   
     def __init__(self, src_vocab_size, tgt_vocab_size, d_model=512, num_layers=6, num_heads=8, d_ff=2048, max_len=5000, dropout=0.1):
         super(Transformer, self).__init__()
         
