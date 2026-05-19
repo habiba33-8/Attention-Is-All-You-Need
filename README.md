@@ -69,7 +69,7 @@ flowchart TB
 | `03_positional_encoding` | Positional encoding implementation and `visualization.ipynb` for exploration. |
 | `04_encoder_block` | Single encoder layer (self-attention + FFN + norms). |
 | `05_decoder_block` | Decoder layer (masked self-attention, encoder–decoder attention, FFN) and masking helpers. |
-| `06_transformer_full` | End-to-end `Transformer`, `train.py`, and `config.yaml`. |
+| `06_transformer_full` |full model + training loop |
 | `experiments` | Ablation-style scripts and `results.md` documenting comparisons (e.g., single vs multi-head expectations vs paper Table 3). |
 
 ---
